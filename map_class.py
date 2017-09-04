@@ -2,33 +2,43 @@ import pygame
 import screen
 import csv
 import random
+
 import player_class
+import utils
 
 # Map class
-class Map(object):
+class Map:
 
     def __init__(self):
-        self.water_image = pygame.image.load("water.png").convert()
-        self.land_image = pygame.image.load("land.png").convert()
-        self.portal_image = pygame.image.load("portal.png").convert()
-        self.re_port_image = pygame.image.load("re-port.png").convert()
-        self.beach_image = pygame.image.load("beach.png").convert()
-        self.gold_image = pygame.image.load("gold.png").convert()
-        self.trap_image = pygame.image.load("hole.png").convert()
-        self.heart_image = pygame.image.load("heart.png").convert()
-        self.spade_image = pygame.image.load("spade.png").convert()
+        self.water_image = pygame.image.load("water.png").convert_alpha()
+        self.land_image = pygame.image.load("land.png").convert_alpha()
+        self.portal_image = pygame.image.load("portal.png").convert_alpha()
+        self.re_port_image = pygame.image.load("re-port.png").convert_alpha()
+        self.beach_image = pygame.image.load("beach.png").convert_alpha()
+        self.gold_image = pygame.image.load("gold.png").convert_alpha()
+        self.trap_image = pygame.image.load("hole.png").convert_alpha()
+        self.heart_image = pygame.image.load("heart.png").convert_alpha()
+        self.spade_image = pygame.image.load("spade.png").convert_alpha()
 
-        self.sword_1_image = pygame.image.load("sword_1.png").convert()
-        self.sword_2_image = pygame.image.load("sword_2.png").convert()
-        self.sword_3_image = pygame.image.load("sword_3.png").convert()
-        self.sword_4_image = pygame.image.load("sword_4.png").convert()
+        self.sword_1_image = pygame.image.load("sword_1.png").convert_alpha()
+        self.sword_2_image = pygame.image.load("sword_2.png").convert_alpha()
+        self.sword_3_image = pygame.image.load("sword_3.png").convert_alpha()
+        self.sword_4_image = pygame.image.load("sword_4.png").convert_alpha()
 
-        self.castle_1_image = pygame.image.load("castle_1.png").convert()
-        self.castle_2_image = pygame.image.load("castle_2.png").convert()
-        self.castle_3_image = pygame.image.load("castle_3.png").convert()
-        self.castle_4_image = pygame.image.load("castle_4.png").convert()
-        self.castle_5_image = pygame.image.load("castle_5.png").convert()
-        self.castle_6_image = pygame.image.load("castle_6.png").convert()
+        self.castle_1_image = pygame.image.load("castle_1.png").convert_alpha()
+        self.castle_2_image = pygame.image.load("castle_2.png").convert_alpha()
+        self.castle_3_image = pygame.image.load("castle_3.png").convert_alpha()
+        self.castle_4_image = pygame.image.load("castle_4.png").convert_alpha()
+        self.castle_5_image = pygame.image.load("castle_5.png").convert_alpha()
+        self.castle_6_image = pygame.image.load("castle_6.png").convert_alpha()
+
+
+        self.gold_sound = utils.load_media('audio', 'gold')
+        self.extra_life_sound = utils.load_media('audio', 'extra_life')
+        self.spade_sound = utils.load_media('audio', 'spade')
+        self.sword_sound = utils.load_media('audio', 'sword')
+        self.portal_sound = utils.load_media('audio', 'portal')
+        self.water_sound = utils.load_media('audio', 'water')
 
         self.map_key = {'w': 'water',
                    'l': 'land',
@@ -223,34 +233,50 @@ class Map(object):
         touching_castle_5 = self.player_touching('castle 5', tile_left, tile_right)
         touching_castle_6 = self.player_touching('castle 6', tile_left, tile_right)
 
-        if touching_water is True:
+        if touching_water is True and player.alive is True:
             player.map_water()
+            self.water_sound.play()
+
         elif touching_gold is True:
             player.map_gold()
             self.remove_item('gold', tile_left, tile_right)
+            self.gold_sound.play()
+
         elif touching_heart is True:
             if player.lives < player.max_lives:
                 player.map_heart()
                 self.remove_item('heart', tile_left, tile_right)
+                self.extra_life_sound.play()
+
         elif touching_spade is True:
             if player.spades < player.max_spades:
                 player.map_spade()
                 self.remove_item('spade', tile_left, tile_right)
+                self.spade_sound.play()
+
         elif touching_portal is True:
             self.portal_move()
+            self.portal_sound.play()
 
         elif touching_sword_1 is True:
             player.map_sword(1)
             self.remove_item('sword 1', tile_left, tile_right)
+            self.sword_sound.play()
+
         elif touching_sword_2 is True:
             player.map_sword(2)
             self.remove_item('sword 2', tile_left, tile_right)
+            self.sword_sound.play()
+
         elif touching_sword_3 is True:
             player.map_sword(3)
             self.remove_item('sword 3', tile_left, tile_right)
+            self.sword_sound.play()
+
         elif touching_sword_4 is True:
             player.map_sword(4)
             self.remove_item('sword 4', tile_left, tile_right)
+            self.sword_sound.play()
 
         elif touching_castle_1 is True:
             player.map_castle()

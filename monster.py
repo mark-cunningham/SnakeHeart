@@ -1,29 +1,34 @@
-import pygame
+# Toadie
+# Code Angel
+
+# Classes: Monster, Bumber, Whizzer and Boxer
+
+import utils
+
 import screen
 import random
 
 
+class Monster:
 
-class Monster(object):
+    def __init__(self, image, speed):
 
-    def __init__(self, image, speed):#, random_direction, intelligence):
-
-        self.monster_image = pygame.image.load(image).convert()
+        self.monster_image = utils.load_media('image', image)
 
         self.rect = self.monster_image.get_rect()
         self.width = self.rect.width
         self.height = self.rect.height
         self.speed = speed
 
-        #self.random_direction = random_direction
-        #self.intelligence = intelligence
+        self.direction = None
 
         self.alive = True
 
-        self.terrain_type_1 = ''
-        self.terrain_type_2 = ''
-        self.terrain_type_3 = ''
-        self.terrain_type_4 = ''
+        # The terrain types at either side of the monster
+        self.terrain_type_1 = None
+        self.terrain_type_2 = None
+        self.terrain_type_3 = None
+        self.terrain_type_4 = None
 
     def standard_direction(self):
         self.direction = random.choice(['left', 'right', 'up', 'down'])
@@ -31,33 +36,33 @@ class Monster(object):
     def diagonal_direction(self):
         self.direction = random.choice(['up right', 'down right', 'down left', 'up left'])
 
-    def spawn_location(self, map):
+    # Calculate a random spawn location which must be on land
+    def spawn_location(self, game_map):
 
-        start_tile_col = random.randint(0, map.map_cols - 1)
-        start_tile_row = random.randint(0, map.map_rows - 1)
+        start_tile_col = random.randint(0, game_map.map_cols - 1)
+        start_tile_row = random.randint(0, game_map.map_rows - 1)
 
-        terrain = map.map_key.get(map.tile_list[start_tile_row][start_tile_col])
+        terrain = game_map.map_key.get(game_map.tile_list[start_tile_row][start_tile_col])
         while terrain != 'land':
-            start_tile_col = random.randint(0, map.map_cols - 1)
-            start_tile_row = random.randint(0, map.map_rows - 1)
+            start_tile_col = random.randint(0, game_map.map_cols - 1)
+            start_tile_row = random.randint(0, game_map.map_rows - 1)
 
-            terrain = map.map_key.get(map.tile_list[start_tile_row][start_tile_col])
+            terrain = game_map.map_key.get(game_map.tile_list[start_tile_row][start_tile_col])
 
-        self.rect.x = (start_tile_col - map.map_tile_x) * screen.TILE_SIZE
-        self.rect.y = (start_tile_row - map.map_tile_y) * screen.TILE_SIZE
+        self.rect.x = (start_tile_col - game_map.map_tile_x) * screen.TILE_SIZE
+        self.rect.y = (start_tile_row - game_map.map_tile_y) * screen.TILE_SIZE
 
-
-
-
-
-
+    # Draw the monster passing the image and location to the Display class
     def draw(self, display):
         if self.alive is True:
-            #game_screen.blit(self.monster_image, [self.rect.x, self.rect.y])
             display.show_image(self.monster_image, self.rect.x, self.rect.y)
 
-    def move(self, map):
+    # Move the monster
+    def move(self, game_map):
+
         if self.alive is True:
+
+            # Update the x and y location based on the direction the monster is moving in
             if 'right' in self.direction:
                 self.rect.x += self.speed
             if 'left' in self.direction:
@@ -67,57 +72,76 @@ class Monster(object):
             if 'up' in self.direction:
                 self.rect.y -= self.speed
 
+            # Update the monster's location based on any map scrolling
+            self.rect.x += game_map.dx
+            self.rect.y += game_map.dy
 
-            self.rect.x += map.dx
-            self.rect.y += map.dy
-
-            self.update_surrounding_terrain(map)
+            # Update the surrounding terrain details, check if fallen into hole / drowned, and maybe change direction
+            self.update_surrounding_terrain(game_map)
             self.check_for_hole()
             self.check_if_drowned()
             self.maybe_change_direction()
 
-
-
-
-    def update_surrounding_terrain(self, map):
+    # The tiles surrounding the monster
+    # Used because the map scrolls by less than a full tile size
+    def update_surrounding_terrain(self, game_map):
         monster_tile_x_1 = int(self.rect.x / screen.TILE_SIZE) + 1
         monster_tile_x_2 = int((self.rect.x + self.rect.width) / screen.TILE_SIZE) + 1
         monster_tile_y_1 = int(self.rect.y / screen.TILE_SIZE) + 1
         monster_tile_y_2 = int((self.rect.y + self.rect.height) / screen.TILE_SIZE) + 1
 
+        # Work out what is actually in the terrain surrounding the monster
+        rel_y1 = game_map.map_tile_y + monster_tile_y_1
+        rel_x1 = game_map.map_tile_x + monster_tile_x_1
+        rel_y2 = game_map.map_tile_y + monster_tile_y_2
+        rel_x2 = game_map.map_tile_x + monster_tile_x_2
+        self.terrain_type_1 = game_map.map_key.get(game_map.tile_list[rel_y1][rel_x1])
+        self.terrain_type_2 = game_map.map_key.get(game_map.tile_list[rel_y1][rel_x2])
+        self.terrain_type_3 = game_map.map_key.get(game_map.tile_list[rel_y2][rel_x1])
+        self.terrain_type_4 = game_map.map_key.get(game_map.tile_list[rel_y2][rel_x2])
 
-
-        self.terrain_type_1 = map.map_key.get(map.tile_list[map.map_tile_y + monster_tile_y_1][map.map_tile_x + monster_tile_x_1])
-        self.terrain_type_2 = map.map_key.get(map.tile_list[map.map_tile_y + monster_tile_y_1][map.map_tile_x + monster_tile_x_2])
-        self.terrain_type_3 = map.map_key.get(map.tile_list[map.map_tile_y + monster_tile_y_2][map.map_tile_x + monster_tile_x_1])
-        self.terrain_type_4 = map.map_key.get(map.tile_list[map.map_tile_y + monster_tile_y_2][map.map_tile_x + monster_tile_x_2])
-
-
+    # Test if the monster fallen into a hole
     def check_for_hole(self):
+
         if self.alive is True:
-            if self.terrain_type_1 == 'trap' or self.terrain_type_2 == 'trap' or self.terrain_type_3 == 'trap' or self.terrain_type_4 == 'trap':
+
+            if (self.terrain_type_1 == 'trap' or
+                    self.terrain_type_2 == 'trap' or
+                    self.terrain_type_3 == 'trap' or
+                    self.terrain_type_4 == 'trap'):
+
+                # The monster has fallen into a hole, so alive will be false and kills need to be updated
                 self.alive = False
                 self.update_kills()
 
+    # Overridden in Bumbler, Whizzer and Boxer
     def update_kills(self):
         pass
 
-
+    # Test if the monster has fallen into water
     def check_if_drowned(self):
         if self.alive is True:
-            if self.terrain_type_1 == 'water' or self.terrain_type_2 == 'water' or self.terrain_type_3 == 'water' or self.terrain_type_4 == 'water':
+            if (self.terrain_type_1 == 'water' or
+                    self.terrain_type_2 == 'water' or
+                    self.terrain_type_3 == 'water' or
+                    self.terrain_type_4 == 'water'):
+
                 self.alive = False
 
+    # Overridden in Bumbler and Boxer - Whizzer does not change direction
     def maybe_change_direction(self):
         pass
 
+    # The player has used a portal, so the relative postion of the monster will need to change accordingly
     def portal(self, portal_x, portal_y):
         self.rect.x += portal_x * screen.TILE_SIZE
         self.rect.y += portal_y * screen.TILE_SIZE
 
 
+# Bumbler class inherits from Monster
 class Bumbler(Monster):
 
+    # Class variables
     spawn_chance = 250
     kills = 0
     max = 100
@@ -136,7 +160,7 @@ class Bumbler(Monster):
             self.intelligence = 3
             speed = 2
 
-        super().__init__("monster_down.png", speed)
+        super().__init__("monster_down", speed)
         super().standard_direction()
 
 
@@ -186,7 +210,7 @@ class Whizzer(Monster):
         elif level == 2:
             speed = 10
 
-        super().__init__("whizzer_down.png", speed)
+        super().__init__("whizzer_down", speed)
         super().standard_direction()
 
     @staticmethod
@@ -219,7 +243,7 @@ class Boxer(Monster):
             self.random_direction = 5
             speed = 5
 
-        super().__init__("boxer_down.png", speed)
+        super().__init__("boxer_down", speed)
         super().diagonal_direction()
         #Monster.__init__(self, "boxer_down.png", speed)
 
