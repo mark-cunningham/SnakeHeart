@@ -51,13 +51,13 @@ def main():
     boxers_spawn_start = 0
 
     if game_map.level == 1:
-        bumblers_spawn_start = 3
-        whizzers_spawn_start = 2
-        boxers_spawn_start = 4
+        bumblers_spawn_start = 50
+        whizzers_spawn_start = 50
+        boxers_spawn_start = 50
     elif game_map.level == 2:
-        bumblers_spawn_start = 10
-        whizzers_spawn_start = 10
-        boxers_spawn_start = 10
+        bumblers_spawn_start = 150
+        whizzers_spawn_start = 75
+        boxers_spawn_start = 100
 
     # Spawn Bumblers
     for bumbler_count in range(bumblers_spawn_start):

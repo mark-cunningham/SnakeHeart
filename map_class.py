@@ -1,38 +1,47 @@
+# Snake Heart
+# Code Angel
+
+# Classes: Map
+
 import pygame
 import screen
 import csv
 import random
+import os
 
 import player_class
 import utils
+
 
 # Map class
 class Map:
 
     def __init__(self):
-        self.water_image = pygame.image.load("water.png").convert_alpha()
-        self.land_image = pygame.image.load("land.png").convert_alpha()
-        self.portal_image = pygame.image.load("portal.png").convert_alpha()
-        self.re_port_image = pygame.image.load("re-port.png").convert_alpha()
-        self.beach_image = pygame.image.load("beach.png").convert_alpha()
-        self.gold_image = pygame.image.load("gold.png").convert_alpha()
-        self.trap_image = pygame.image.load("hole.png").convert_alpha()
-        self.heart_image = pygame.image.load("heart.png").convert_alpha()
-        self.spade_image = pygame.image.load("spade.png").convert_alpha()
 
-        self.sword_1_image = pygame.image.load("sword_1.png").convert_alpha()
-        self.sword_2_image = pygame.image.load("sword_2.png").convert_alpha()
-        self.sword_3_image = pygame.image.load("sword_3.png").convert_alpha()
-        self.sword_4_image = pygame.image.load("sword_4.png").convert_alpha()
+        # Load all map images
+        self.water_image = utils.load_media('image', 'water')
+        self.land_image = utils.load_media('image', 'land')
+        self.portal_image = utils.load_media('image', 'portal')
+        self.re_port_image = utils.load_media('image', 're-port')
+        self.beach_image = utils.load_media('image', 'beach')
+        self.gold_image = utils.load_media('image', 'gold')
+        self.trap_image = utils.load_media('image', 'hole')
+        self.heart_image = utils.load_media('image', 'heart')
+        self.spade_image = utils.load_media('image', 'spade')
 
-        self.castle_1_image = pygame.image.load("castle_1.png").convert_alpha()
-        self.castle_2_image = pygame.image.load("castle_2.png").convert_alpha()
-        self.castle_3_image = pygame.image.load("castle_3.png").convert_alpha()
-        self.castle_4_image = pygame.image.load("castle_4.png").convert_alpha()
-        self.castle_5_image = pygame.image.load("castle_5.png").convert_alpha()
-        self.castle_6_image = pygame.image.load("castle_6.png").convert_alpha()
+        self.sword_1_image = utils.load_media('image', 'sword_1')
+        self.sword_2_image = utils.load_media('image', 'sword_2')
+        self.sword_3_image = utils.load_media('image', 'sword_3')
+        self.sword_4_image = utils.load_media('image', 'sword_4')
 
+        self.castle_1_image = utils.load_media('image', 'castle_1')
+        self.castle_2_image = utils.load_media('image', 'castle_2')
+        self.castle_3_image = utils.load_media('image', 'castle_3')
+        self.castle_4_image = utils.load_media('image', 'castle_4')
+        self.castle_5_image = utils.load_media('image', 'castle_5')
+        self.castle_6_image = utils.load_media('image', 'castle_6')
 
+        # Load all map audio
         self.gold_sound = utils.load_media('audio', 'gold')
         self.extra_life_sound = utils.load_media('audio', 'extra_life')
         self.spade_sound = utils.load_media('audio', 'spade')
@@ -40,38 +49,43 @@ class Map:
         self.portal_sound = utils.load_media('audio', 'portal')
         self.water_sound = utils.load_media('audio', 'water')
 
-        self.map_key = {'w': 'water',
-                   'l': 'land',
-                   'p': 'portal',
-                   'r': 're-port',
-                   'b': 'beach',
-                   'g': 'gold',
-                   't': 'trap',
-                   'h': 'heart',
-                   'd': 'spade',
-                   '1': 'sword 1',
-                   '2': 'sword 2',
-                   '3': 'sword 3',
-                   '4': 'sword 4',
-                   'c1': 'castle 1',
-                   'c2': 'castle 2',
-                   'c3': 'castle 3',
-                   'c4': 'castle 4',
-                   'c5': 'castle 5',
-                   'c6': 'castle 6',
-                        }
+        self.map_key = {
+            'w': 'water',
+            'l': 'land',
+            'p': 'portal',
+            'r': 're-port',
+            'b': 'beach',
+            'g': 'gold',
+            't': 'trap',
+            'h': 'heart',
+            'd': 'spade',
+            '1': 'sword 1',
+            '2': 'sword 2',
+            '3': 'sword 3',
+            '4': 'sword 4',
+            'c1': 'castle 1',
+            'c2': 'castle 2',
+            'c3': 'castle 3',
+            'c4': 'castle 4',
+            'c5': 'castle 5',
+            'c6': 'castle 6'
+        }
 
-
-
+        # Total number of rows and columns in the map
         self.screen_cols = int(screen.SCREENWIDTH / screen.TILE_SIZE)
         self.screen_rows = int(screen.SCREENHEIGHT / screen.TILE_SIZE)
+
+        self.map_cols = None
+        self.map_rows = None
+
+        self.re_port_points = []
 
         self.map_tile_x = 0
         self.map_tile_y = 0
         self.map_tile_step_x = 0
         self.map_tile_step_y = 0
 
-        self.player_row = int(screen.SCREENHEIGHT / screen.TILE_SIZE/ 2 + 1)
+        self.player_row = int(screen.SCREENHEIGHT / screen.TILE_SIZE / 2 + 1)
         self.player_col_left = int(screen.SCREENWIDTH / screen.TILE_SIZE / 2)
         self.player_col_right = int(screen.SCREENWIDTH / screen.TILE_SIZE / 2 + 1)
 
@@ -83,31 +97,35 @@ class Map:
         self.d_portal_y = 0
 
         self.level = 0
+        self.tile_list = None
 
-
-
-
-
+    # Load the CSV map
     def load_map(self):
 
-        map_file = ''
+        map_file = None
 
         if self.level == 1:
-            map_file = 'snakeheart map level 1.csv'
+            map_file = 'snakeheart map level 1'
         elif self.level == 2:
-            map_file = 'snakeheart map level 2.csv'
+            map_file = 'snakeheart map level 2'
 
-        with open(map_file, 'r') as csvfile:
+        full_path = os.path.dirname(os.path.realpath(__file__))
+        maps_path = os.path.join(full_path, 'maps')
+        full_filename = os.path.join(maps_path, map_file + '.csv')
+
+        # Open and read the map CSV file and store in 2D list tile list
+        with open(full_filename, 'r') as csvfile:
             read_map = csv.reader(csvfile)
             self.tile_list = list(read_map)
 
+        # Calculate total map rows and columns
         self.map_cols = len(self.tile_list[0])
         self.map_rows = len(self.tile_list)
 
-        self.re_port_points = []
+        # Find all map re-port points
         self.find_re_port_points()
 
-
+    # Scroll map as player moves
     def scroll(self, direction):
 
         self.dx = 0
@@ -115,29 +133,27 @@ class Map:
 
         if direction == 'right':
             if self.map_tile_x > 0:
-                #self.map_tile_step_x += PLAYER_MOVE
                 self.dx = player_class.PLAYER_MOVE
                 self.dy = 0
+
         elif direction == 'left':
             if self.map_tile_x < self.map_cols - self.screen_cols - 1:
-                #self.map_tile_step_x -= PLAYER_MOVE
                 self.dx = -player_class.PLAYER_MOVE
                 self.dy = 0
+
         elif direction == 'down':
             if self.map_tile_y > 0:
-                #self.map_tile_step_y += PLAYER_MOVE
                 self.dx = 0
                 self.dy = player_class.PLAYER_MOVE
+
         elif direction == 'up':
             if self.map_tile_y < self.map_rows - self.screen_rows - 1:
-                #self.map_tile_step_y -= PLAYER_MOVE
                 self.dx = 0
                 self.dy = -player_class.PLAYER_MOVE
 
+        # Work out if a complete tile has been scrolled, and if so update map_tile_x / map_tile_y
         self.map_tile_step_x += self.dx
         self.map_tile_step_y += self.dy
-
-
 
         if self.map_tile_step_x >= screen.TILE_SIZE:
             self.map_tile_step_x -= screen.TILE_SIZE
@@ -155,11 +171,19 @@ class Map:
             self.map_tile_step_y += screen.TILE_SIZE
             self.map_tile_y += 1
 
+
+    # Draw the map items
     def draw(self, display):
         for row in range(self.screen_rows + 1):
             for col in range(self.screen_cols + 1):
-                tile = self.map_key.get(self.tile_list[row + self.map_tile_y][col + self.map_tile_x])
-                display_image = ''
+
+                lucy_row = row + self.map_tile_y
+                lucy_col = col + self.map_tile_x
+                tile_key = self.tile_list[lucy_row][lucy_col]
+
+                tile = self.map_key.get(tile_key)
+
+                display_image = None
 
                 if tile == 'water':
                     display_image = self.water_image
@@ -202,18 +226,22 @@ class Map:
                 elif tile == 'castle 6':
                     display_image = self.castle_6_image
 
-                #game_screen.blit(display_image, [(col - 1) * TILE_SIZE + self.map_tile_step_x,
-                #                                (row - 1) * TILE_SIZE + self.map_tile_step_y])
-
-                display.show_image(display_image, (col - 1) * screen.TILE_SIZE + self.map_tile_step_x, (row - 1) * screen.TILE_SIZE + self.map_tile_step_y)
+                x_pos = (col - 1) * screen.TILE_SIZE + self.map_tile_step_x
+                y_pos = (row - 1) * screen.TILE_SIZE + self.map_tile_step_y
+                display.show_image(display_image, x_pos, y_pos)
 
     def reset_change(self):
         self.dx = 0
         self.dy = 0
 
+    # Test if Lucy has come into contact with any map items
     def check_player_loc(self, player):
-        tile_left = self.map_key.get(self.tile_list[self.player_row + self.map_tile_y + 1][self.player_col_left + self.map_tile_x])
-        tile_right = self.map_key.get(self.tile_list[self.player_row + self.map_tile_y + 1][self.player_col_right + self.map_tile_x])
+        player_x = self.player_row + self.map_tile_y + 1
+        player_y_left = self.player_col_left + self.map_tile_x
+        player_y_right = self.player_col_right + self.map_tile_x
+
+        tile_left = self.map_key.get(self.tile_list[player_x][player_y_left])
+        tile_right = self.map_key.get(self.tile_list[player_x][player_y_right])
 
         touching_water = self.player_touching('water', tile_left, tile_right)
         touching_gold = self.player_touching('gold', tile_left, tile_right)
@@ -291,7 +319,7 @@ class Map:
         elif touching_castle_6 is True:
             player.map_castle()
 
-
+    # Lucy has dug a hole / trap so add this 2 the map (6 pieces)
     def add_trap(self):
         self.add_trap_piece(self.player_row + self.map_tile_y, self.player_col_left + self.map_tile_x)
         self.add_trap_piece(self.player_row + self.map_tile_y, self.player_col_left + self.map_tile_x + 1)
@@ -300,11 +328,12 @@ class Map:
         self.add_trap_piece(self.player_row + self.map_tile_y + 1, self.player_col_left + self.map_tile_x + 1)
         self.add_trap_piece(self.player_row + self.map_tile_y + 1, self.player_col_left + self.map_tile_x + 2)
 
+    # Add a trap piece ('t') only if the space is land ('l')
     def add_trap_piece(self, row_tile, col_tile):
         if self.tile_list[row_tile][col_tile] == 'l':
             self.tile_list[row_tile][col_tile] = 't'
 
-
+    # Port to a random re-port point
     def portal_move(self):
         random_re_port = random.choice(self.re_port_points)
         new_map_x = random_re_port[1] - 20
@@ -319,6 +348,7 @@ class Map:
 
         self.portal = True
 
+    # Find all the re-port points in the map and add to the list re_port_points
     def find_re_port_points(self):
         for row in range(self.map_rows):
             for col in range(self.map_cols):
@@ -327,9 +357,7 @@ class Map:
                 if tile == 're-port':
                     self.re_port_points.append([row, col])
 
-
-
-
+    # Is the player touching an item
     def player_touching(self, item, tile_left, tile_right):
         player_touching_item = False
         if (tile_left == item and self.map_tile_step_x > player_class.PLAYER_MOVE) or tile_right == item:
@@ -337,8 +365,9 @@ class Map:
 
         return player_touching_item
 
+    # Remove an item by changing its map value to land ('l')
     def remove_item(self, item, tile_left, tile_right):
-        if (tile_left == item and self.map_tile_step_x > player_class.PLAYER_MOVE):
+        if tile_left == item and self.map_tile_step_x > player_class.PLAYER_MOVE:
             self.tile_list[self.player_row + self.map_tile_y + 1][self.player_col_left + self.map_tile_x] = 'l'
         elif tile_right == item:
-            self.tile_list[self.player_row + self.map_tile_y + 1][self.player_col_right+ self.map_tile_x] = 'l'
+            self.tile_list[self.player_row + self.map_tile_y + 1][self.player_col_right + self.map_tile_x] = 'l'

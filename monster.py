@@ -1,4 +1,4 @@
-# Toadie
+# Snake Heart
 # Code Angel
 
 # Classes: Monster, Bumber, Whizzer and Boxer
@@ -142,11 +142,18 @@ class Monster:
 class Bumbler(Monster):
 
     # Class variables
-    spawn_chance = 250
+
+    # Chance of a Bumbler being spawned
+    spawn_chance = 200
+
+    # Number of Bumblers killed
     kills = 0
-    max = 100
+
+    # Maximum number of Bumblers in the game
+    max = 150
 
     def __init__(self, level):
+
         speed = 0
         self.random_direction = 0
         self.intelligence = 0
@@ -160,47 +167,59 @@ class Bumbler(Monster):
             self.intelligence = 3
             speed = 2
 
-        super().__init__("monster_down", speed)
+        super().__init__('monster_down', speed)
         super().standard_direction()
 
-
+    # Static method to spawn a bumbler
     @staticmethod
-    def spawn(bumblers, map):
-        spawn_chance = random.randint(1, Bumbler.spawn_chance)
-        if spawn_chance == 1 and len(bumblers) < Bumbler.max:
-            bumbler = Bumbler(map.level)
-            bumbler.spawn_location(map)
+    def spawn(bumblers, game_map):
+        random_spawn = random.randint(1, Bumbler.spawn_chance)
+        if random_spawn == 1 and len(bumblers) < Bumbler.max:
+            bumbler = Bumbler(game_map.level)
+            bumbler.spawn_location(game_map)
             bumblers.append(bumbler)
 
+    # Increase the class variable kills
     def update_kills(self):
         Bumbler.kills += 1
 
-
-
+    # Randomly generate a change in direction
     def maybe_change_direction(self):
-        # chance change is the chance of changing direction
+
+        # chance_change is the chance of changing direction
+        # The higher random_direction, the less likely a random change
         chance_change = random.randint(1, self.random_direction)
+
+        # Only change if the randomly generated value is 1
         if chance_change == 1:
-            # smart change is going in the direction of player
-            # lower intelligence, greater chance of a smart change rather than random
+
+            # smart change means going in the direction of player
+            # lower intelligence number, greater chance of a smart change rather than random
             smart_change = random.randint(1, self.intelligence)
+
             if smart_change == 1:
+
+                # The player is always at the centre of the map
+                # Move vertical direction towards player
                 if self.rect.y < screen.SCREENHEIGHT / 2:
                     self.direction = 'down'
                 else:
                     self.direction = 'up'
             elif smart_change == 2:
+
+                # Move horizontal direction towards player
                 if self.rect.x < screen.SCREENWIDTH / 2:
                     self.direction = 'right'
                 else:
                     self.direction = 'left'
 
 
+# Whizzer class inherits from Monster
 class Whizzer(Monster):
 
-    spawn_chance = 200
+    spawn_chance = 50
     kills = 0
-    max = 30
+    max = 75
 
     def __init__(self, level):
         speed = 0
@@ -210,27 +229,27 @@ class Whizzer(Monster):
         elif level == 2:
             speed = 10
 
-        super().__init__("whizzer_down", speed)
+        super().__init__('whizzer_down', speed)
         super().standard_direction()
 
     @staticmethod
-    def spawn(whizzers, map):
-        spawn_chance = random.randint(1, Whizzer.spawn_chance)
-        if spawn_chance == 1 and len(whizzers) < Whizzer.max:
-            whizzer = Whizzer(map.level)
-            whizzer.spawn_location(map)
+    def spawn(whizzers, game_map):
+        random_spawn = random.randint(1, Whizzer.spawn_chance)
+        if random_spawn == 1 and len(whizzers) < Whizzer.max:
+            whizzer = Whizzer(game_map.level)
+            whizzer.spawn_location(game_map)
             whizzers.append(whizzer)
 
     def update_kills(self):
         Whizzer.kills += 1
 
 
-
+# Boxer class inherits from Monster
 class Boxer(Monster):
 
-    spawn_chance = 500
+    spawn_chance = 200
     kills = 0
-    max = 70
+    max = 100
 
     def __init__(self, level):
         self.random_direction = 0
@@ -243,16 +262,16 @@ class Boxer(Monster):
             self.random_direction = 5
             speed = 5
 
-        super().__init__("boxer_down", speed)
+        super().__init__('boxer_down', speed)
         super().diagonal_direction()
-        #Monster.__init__(self, "boxer_down.png", speed)
 
     def maybe_change_direction(self):
-        # chance change is the chance of changing direction
+
         chance_change = random.randint(1, self.random_direction)
+
         if chance_change == 1:
             if self.direction == 'up right':
-                self.direction =  'down right'
+                self.direction = 'down right'
             elif self.direction == 'down right':
                 self.direction = 'down left'
             elif self.direction == 'down left':
@@ -261,11 +280,11 @@ class Boxer(Monster):
                 self.direction = 'up right'
 
     @staticmethod
-    def spawn(boxers, map):
-        spawn_chance = random.randint(1, Boxer.spawn_chance)
-        if spawn_chance == 1 and len(boxers) < Boxer.max:
-            boxer = Boxer(map.level)
-            boxer.spawn_location(map)
+    def spawn(boxers, game_map):
+        random_spawn = random.randint(1, Boxer.spawn_chance)
+        if random_spawn == 1 and len(boxers) < Boxer.max:
+            boxer = Boxer(game_map.level)
+            boxer.spawn_location(game_map)
             boxers.append(boxer)
 
     def update_kills(self):

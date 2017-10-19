@@ -1,3 +1,8 @@
+# Snake Heart
+# Code Angel
+
+# Utils functions
+
 import pygame
 import os
 
@@ -8,6 +13,8 @@ import player_class
 WHITE = (255, 255, 255)
 GREEN = (51, 223, 32)
 
+
+# Display the scoreboard at the top of the screen
 def display_scoreboard(display, font, gold, lives, spades, sword):
     text_y = 3
     gold_text_x = 28
@@ -34,7 +41,11 @@ def display_scoreboard(display, font, gold, lives, spades, sword):
     text = font.render(str(total_kills), True, WHITE)
     display.show_image(text, kills_text_x, text_y)
 
-    total_score = gold * gold_score + monster.Bumbler.kills * bumbler_score + monster.Whizzer.kills * whizzer_score + monster.Boxer.kills * boxer_score
+    total_score = (gold * gold_score +
+                   monster.Bumbler.kills * bumbler_score +
+                   monster.Whizzer.kills * whizzer_score +
+                   monster.Boxer.kills * boxer_score)
+
     text = font.render(str(total_score), True, GREEN)
     display.show_image(text, score_text_x, text_y)
 
@@ -59,12 +70,10 @@ def display_scoreboard(display, font, gold, lives, spades, sword):
                                sword_x + sword_part_num * sword_gap, icon_y)
 
 
-
+# Display the intro screen and wait for 1 or 2 to be pressed
 def intro(display):
 
-    #game_screen.blit(intro_screen, [0, 0])
     display.show_image(display.intro_screen, 0, 0)
-
 
     level = 0
     while level < 1 or level > 2:
@@ -85,6 +94,7 @@ def intro(display):
     return level
 
 
+# Display instructions screen and wait for Space to be pressed
 def instructions(display):
     display.show_image(display.instructions_screen, 0, 0)
 
